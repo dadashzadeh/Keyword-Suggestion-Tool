@@ -1,4 +1,4 @@
-# Autocomplete Suggestions Graph Generator
+## google Autocomplete Suggestions Graph Generator
 
 This Python script fetches autocomplete suggestions from Google's public autocomplete API based on a user-defined query and constructs a graph representing these suggestions. It visualizes the relationships between the original query and its autocomplete suggestions using the `pyvis` library and exports the results to an Excel file.
 
