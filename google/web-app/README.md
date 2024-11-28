@@ -10,12 +10,18 @@ A powerful, bilingual keyword suggestion visualization tool built with Streamlit
 - 🔄 Up to 3 levels of suggestions depth
 - 🌐 Bilingual support (English/Persian)
 
-## Installation
+## Installation dependencies
 ```bash
-# Install dependencies
 pip install -r requirements.txt
+```
 
-# Run the application
+## Installation nltk
+```
+python -m nltk.downloader all
+```
+
+## Run the application
+```
 streamlit run app.py
 ```
 
