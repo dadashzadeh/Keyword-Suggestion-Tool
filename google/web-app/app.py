@@ -14,7 +14,7 @@ from io import BytesIO
 
 # Configuration
 st.set_page_config(
-    page_title="google Suggestions",
+    page_title="Google Suggestions",
     page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -74,7 +74,6 @@ def get_suggestions(keyword: str, source: str = 'google', language: str = 'engli
         st.error(f"Error fetching suggestions: {str(e)}")
         return []
 
-@st.cache_data(ttl=3600)
 def get_suggests_tree(keyword: str, source: str = 'google', max_depth: int = 3, language: str = 'english') -> pd.DataFrame:
     """Get a tree of search suggestions with language support."""
     edges = []
@@ -160,7 +159,8 @@ def analyze_suggestions(df: pd.DataFrame, language: str = 'english') -> pd.DataF
         except LookupError:
             nltk.download('punkt')
             nltk.download('stopwords')
-        
+            nltk.download('punkt_tab')
+            
         tokenize_func = word_tokenize
         normalize_func = str.lower
         stop_words = set(stopwords.words('english'))
@@ -184,7 +184,7 @@ def analyze_suggestions(df: pd.DataFrame, language: str = 'english') -> pd.DataF
     enhanced_df['word_repetitions'] = enhanced_df['edge'].apply(count_word_repetitions)
     
     # TF-IDF
-    tfidf = TfidfVectorizer(tokenizer=tokenize_func, preprocessor=normalize_func)
+    tfidf = TfidfVectorizer(tokenizer=tokenize_func, preprocessor=normalize_func, token_pattern=None)
     tfidf_matrix = tfidf.fit_transform(suggestions_text)
     enhanced_df['avg_tfidf'] = np.array(tfidf_matrix.mean(axis=1)).flatten()
     
@@ -260,7 +260,7 @@ def main():
     # Header
     col1, _, col3 = st.columns(3)
     with col1:
-        st.title("google Suggestions 🔍")
+        st.title("Google Suggestions 🔍")
     with col3:
         st.write("")
         st.write("")
@@ -409,88 +409,6 @@ def main():
                     else '### 📊 Analysis Table'
                 )
                 
-                # Define column configuration based on language
-                if language == 'persian':
-                    column_config = {
-                        'word_count': st.column_config.NumberColumn(
-                            'تعداد کلمات',
-                            help='تعداد کلمات در هر پیشنهاد'
-                        ),
-                        'char_count': st.column_config.NumberColumn(
-                            'تعداد حروف',
-                            help='تعداد حروف در هر پیشنهاد'
-                        ),
-                        'word_repetitions': st.column_config.NumberColumn(
-                            'تکرار کلمات',
-                            help='تعداد کلمات تکراری'
-                        ),
-                        'avg_tfidf': st.column_config.NumberColumn(
-                            'نمره TF-IDF',
-                            help='معیار اهمیت کلمات',
-                            format="%.3f"
-                        ),
-                        'keyword_density': st.column_config.NumberColumn(
-                            'تراکم کلیدواژه',
-                            help='درصد تکرار کلیدواژه اصلی',
-                            format="%.2f%%"
-                        ),
-                        'stop_words_ratio': st.column_config.NumberColumn(
-                            'نسبت کلمات عمومی',
-                            help='نسبت کلمات پرکاربرد به کل',
-                            format="%.2f"
-                        ),
-                        'unique_words_ratio': st.column_config.NumberColumn(
-                            'نسبت کلمات یکتا',
-                            help='نسبت کلمات غیرتکراری به کل',
-                            format="%.2f"
-                        ),
-                        'complexity_score': st.column_config.NumberColumn(
-                            'نمره پیچیدگی',
-                            help='معیار پیچیدگی متن (0-1)',
-                            format="%.2f"
-                        )
-                    }
-                else:
-                    column_config = {
-                        'word_count': st.column_config.NumberColumn(
-                            'Word Count',
-                            help='Number of words in suggestion'
-                        ),
-                        'char_count': st.column_config.NumberColumn(
-                            'Char Count',
-                            help='Number of characters'
-                        ),
-                        'word_repetitions': st.column_config.NumberColumn(
-                            'Word Repetitions',
-                            help='Number of repeated words'
-                        ),
-                        'avg_tfidf': st.column_config.NumberColumn(
-                            'TF-IDF Score',
-                            help='Term Frequency-Inverse Document Frequency score',
-                            format="%.3f"
-                        ),
-                        'keyword_density': st.column_config.NumberColumn(
-                            'Keyword Density',
-                            help='Percentage of keyword occurrence',
-                            format="%.2f%%"
-                        ),
-                        'stop_words_ratio': st.column_config.NumberColumn(
-                            'Stop Words Ratio',
-                            help='Ratio of common words',
-                            format="%.2f"
-                        ),
-                        'unique_words_ratio': st.column_config.NumberColumn(
-                            'Unique Words Ratio',
-                            help='Ratio of unique words to total words',
-                            format="%.2f"
-                        ),
-                        'complexity_score': st.column_config.NumberColumn(
-                            'Complexity Score',
-                            help='Custom complexity metric (0-1)',
-                            format="%.2f"
-                        )
-                    }
-                
                 # Create tabs for different views
                 tab1, tab2 = st.tabs(
                     ["نمای ساده", "تحلیل پیشرفته"] if language == 'persian'
@@ -502,15 +420,13 @@ def main():
                                    'keyword_density', 'complexity_score']
                     st.dataframe(
                         enhanced_df[basic_columns],
-                        column_config=column_config,
-                        hide_index=True
+                        #hide_index=True
                     )
                 
                 with tab2:
                     st.dataframe(
                         enhanced_df,
-                        column_config=column_config,
-                        hide_index=True
+                        #hide_index=True
                     )
                 
                 # Add download section
